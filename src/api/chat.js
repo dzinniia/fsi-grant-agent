@@ -1,13 +1,16 @@
 export default async function handler(req, res) {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": process.env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01",
+      "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
     },
-    body: JSON.stringify(req.body),
+    body: JSON.stringify({
+      model: "mistralai/mistral-7b-instruct:free",
+      messages: req.body.messages,
+    }),
   });
   const data = await response.json();
-  res.json(data);
+  const text = data.choices?.[0]?.message?.content || "";
+  res.json({ content: [{ text }] });
 }
