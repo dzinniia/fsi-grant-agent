@@ -113,14 +113,12 @@ export default function App() {
   const canProceed = USER_FIELDS.every(f => userData[f.key]?.trim());
   const doneCount = sections.filter(s => results[s.id]).length;
 
-  const exportText = () => {
-    const grant = FSI_GRANTS.find(g => g.id === selectedGrant);
-    const dir = DIRECTIONS.find(d => d.id === selectedDir);
-    const lines = sections.map(s => `═══ ${s.num ? s.num + ". " : ""}${s.label.toUpperCase()} ═══\n\n${results[s.id] || "(не сгенерировано)"}\n`).join("\n");
-    const header = `ГРАНТОВАЯ ЗАЯВКА — ФСИ ${grant?.label?.toUpperCase() || ""}\nНаправление: ${dir ? dir.label + " — " + dir.full : ""}\nПроект: ${userData.title}\nЗаявитель: ${userData.name} | ${userData.org}\n\n${"─".repeat(60)}\n\n`;
-    const blob = new Blob([header + lines], { type: "text/plain;charset=utf-8" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `fsi_${selectedGrant}.txt`; a.click();
+  const deleteField = (id) => {
+    setSections(s => s.filter(sec => sec.id !== id));
+    setResults(r => { const n = { ...r }; delete n[id]; return n; });
   };
+
+  const generateOne = useCallback(async (sectionId, secs, uData, grantId, dirId) => {
     const sec = (secs || FSI_SECTIONS).find(s => s.id === sectionId);
     if (!sec) return;
     const grant = FSI_GRANTS.find(g => g.id === (grantId || selectedGrant));
@@ -178,6 +176,15 @@ export default function App() {
     };
     run();
   }, [step, generateOne, userData, selectedGrant, selectedDir]);
+
+  const exportText = () => {
+    const grant = FSI_GRANTS.find(g => g.id === selectedGrant);
+    const dir = DIRECTIONS.find(d => d.id === selectedDir);
+    const lines = sections.map(s => `═══ ${s.num ? s.num + ". " : ""}${s.label.toUpperCase()} ═══\n\n${results[s.id] || "(не сгенерировано)"}\n`).join("\n");
+    const header = `ГРАНТОВАЯ ЗАЯВКА — ФСИ ${grant?.label?.toUpperCase() || ""}\nНаправление: ${dir ? dir.label + " — " + dir.full : ""}\nПроект: ${userData.title}\nЗаявитель: ${userData.name} | ${userData.org}\n\n${"─".repeat(60)}\n\n`;
+    const blob = new Blob([header + lines], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `fsi_${selectedGrant}.txt`; a.click();
+  };
 
   const addAndGenerate = async () => {
     if (!newLabel.trim()) return;
