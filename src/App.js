@@ -1,10 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-
-const C = {
-  bg: "#0d0f14", surface: "#13161e", border: "rgba(255,255,255,0.07)",
-  accent: "#3b82f6", accentDim: "rgba(59,130,246,0.15)", text: "#e2e8f0",
-  muted: "rgba(226,232,240,0.4)", success: "#10b981", danger: "#ef4444", warn: "#f59e0b",
-};
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const FSI_GRANTS = [
   { id: "student_startup", label: "Студенческий стартап", desc: "до 1 млн руб · для студентов", ready: true },
