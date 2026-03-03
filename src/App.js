@@ -33,40 +33,42 @@ const DIRECTIONS = [
   { id: "n7", label: "Н7", full: "Креативные индустрии" },
 ];
 
+// Все 19 текстовых полей из заявки ФСИ (пункты 16-34)
 const FSI_SECTIONS = [
-  { id: "keywords", label: "Ключевые слова", hint: "5-10 ключевых слов через запятую, описывающих технологию и рынок" },
-  { id: "nptl", label: "Обоснование соответствия приоритетам НПТЛ", hint: "Как проект соответствует национальным проектам технологического лидерства" },
-  { id: "annotation", label: "Аннотация проекта", hint: "Краткое описание проекта: суть разработки, цель, результат (200-300 слов)" },
-  { id: "goal", label: "Цель проекта", hint: "Конкретная измеримая цель проекта" },
-  { id: "problem", label: "Проблема, которую решает результат проекта", hint: "Какую боль рынка решает проект, почему она важна" },
-  { id: "solution_fit", label: "Каким образом результат проекта решает проблему", hint: "Механизм решения — как именно ваш продукт устраняет проблему" },
-  { id: "product", label: "Описание конечного продукта проекта", hint: "Что именно будет создано: функции, характеристики, форм-фактор" },
-  { id: "application", label: "Область применения продукта проекта", hint: "Где и кем будет использоваться продукт" },
-  { id: "market", label: "Рынок, сегмент рынка", hint: "Целевой рынок, объём, целевая аудитория, сегмент" },
-  { id: "analogs", label: "Существующие аналоги", hint: "Перечислите 3-5 конкурентов или аналогов на рынке" },
-  { id: "advantages", label: "Конкурентные преимущества", hint: "Чем ваш продукт лучше аналогов — конкретные параметры и числа" },
-  { id: "resources", label: "Ресурсы проекта", hint: "Оборудование, ПО, лаборатории, партнёры которые уже есть" },
-  { id: "costs", label: "Затраты на реализацию проекта", hint: "Основные статьи расходов и их обоснование" },
-  { id: "team_plan", label: "Планы по формированию команды проекта", hint: "Кого планируете нанять, какие компетенции нужны" },
-  { id: "revenue", label: "Планируемый способ получения дохода", hint: "Бизнес-модель: как проект будет зарабатывать" },
-  { id: "tech", label: "Техническое решение проекта", hint: "Технологический стек, архитектура, методы реализации" },
-  { id: "tech_advantages", label: "Преимущества выбранного технического решения", hint: "Почему выбрана именно эта технология, её преимущества" },
-  { id: "backlog", label: "Имеющийся задел", hint: "Прототип, патенты, публикации, испытания, расчёты — что уже сделано" },
+  { id: "keywords",       num: 16, label: "Ключевые слова",                                              hint: "5-10 ключевых слов через запятую, описывающих технологию и рынок" },
+  { id: "nptl",           num: 17, label: "Обоснование соответствия приоритетам НПТЛ",                   hint: "Как проект соответствует национальным проектам технологического лидерства" },
+  { id: "annotation",     num: 19, label: "Аннотация проекта",                                           hint: "Краткое описание: суть разработки, цель, ожидаемый результат (200-300 слов)" },
+  { id: "goal",           num: 20, label: "Цель проекта",                                                hint: "Конкретная измеримая цель проекта" },
+  { id: "problem",        num: 21, label: "Проблема, которую решает результат проекта",                  hint: "Развёрнутое обоснование проблемы: масштаб, последствия, почему важна" },
+  { id: "solution_fit",   num: 22, label: "Каким образом результат проекта решает проблему",             hint: "Механизм решения — как именно продукт устраняет проблему" },
+  { id: "product",        num: 23, label: "Описание конечного продукта проекта",                         hint: "Что именно будет создано: функции, характеристики, форм-фактор" },
+  { id: "application",    num: 24, label: "Область применения продукта проекта",                         hint: "Где и кем будет использоваться продукт" },
+  { id: "market",         num: 25, label: "Рынок, сегмент рынка",                                        hint: "Целевой рынок, объём, целевая аудитория, сегмент" },
+  { id: "analogs",        num: 26, label: "Существующие аналоги",                                        hint: "Перечислите 3-5 конкурентов или аналогов на рынке" },
+  { id: "advantages",     num: 27, label: "Конкурентные преимущества",                                   hint: "Чем ваш продукт лучше аналогов — конкретные параметры и числа" },
+  { id: "resources",      num: 28, label: "Ресурсы проекта",                                             hint: "Оборудование, ПО, лаборатории, партнёры которые уже есть" },
+  { id: "costs",          num: 29, label: "Затраты на реализацию проекта",                               hint: "Основные статьи расходов и их обоснование" },
+  { id: "team_plan",      num: 30, label: "Планы по формированию команды проекта",                       hint: "Кого планируете нанять, какие компетенции нужны" },
+  { id: "revenue",        num: 31, label: "Планируемый способ получения дохода",                         hint: "Бизнес-модель: как проект будет зарабатывать" },
+  { id: "tech",           num: 32, label: "Техническое решение проекта",                                 hint: "Технологический стек, архитектура, методы реализации" },
+  { id: "tech_advantages",num: 33, label: "Преимущества выбранного технического решения",                hint: "Почему выбрана именно эта технология, её преимущества" },
+  { id: "backlog",        num: 34, label: "Имеющийся задел (в т.ч. научно-технический)",                 hint: "Прототип, патенты, публикации, испытания, расчёты — что уже сделано" },
 ];
 
+// Поля которые пользователь заполняет вручную (входные данные для AI)
 const USER_FIELDS = [
-  { key: "name", label: "Имя и фамилия *", placeholder: "Иванова Данияр" },
-  { key: "org", label: "Университет / организация *", placeholder: "МГУ им. Ломоносова" },
-  { key: "title", label: "Название проекта *", placeholder: "AI-ассистент для написания грантов" },
-  { key: "product", label: "Что разрабатываете? *", placeholder: "Опишите суть разработки и технологию", multiline: true },
-  { key: "problem", label: "Какую проблему решаете? *", placeholder: "Какую боль рынка закрываете?", multiline: true },
-  { key: "market", label: "Целевой рынок", placeholder: "Кто покупатель, объём рынка", multiline: true },
-  { key: "competitors", label: "Конкуренты и ваше отличие", placeholder: "Аналоги и чем вы лучше (числа, параметры)" },
-  { key: "backlog", label: "Что уже сделано / задел", placeholder: "Прототип, патенты, публикации, испытания" },
-  { key: "team", label: "Команда", placeholder: "ФИО, роли, компетенции" },
-  { key: "budget", label: "Запрашиваемый бюджет", placeholder: "например: 1 млн рублей на 12 месяцев" },
-  { key: "revenue", label: "Бизнес-модель / монетизация", placeholder: "Как проект будет зарабатывать" },
-  { key: "tech", label: "Технологический стек", placeholder: "Какие технологии используете" },
+  { key: "name",        label: "Имя и фамилия *",              placeholder: "Иванова Данияр" },
+  { key: "org",         label: "Университет / организация *",  placeholder: "МГУ им. Ломоносова" },
+  { key: "title",       label: "Название проекта *",           placeholder: "AI-ассистент для написания грантов" },
+  { key: "product",     label: "Что разрабатываете? *",        placeholder: "Опишите суть разработки и технологию", multiline: true },
+  { key: "problem_raw", label: "Какую проблему решаете? *",    placeholder: "Кратко: боль рынка которую вы закрываете", multiline: true },
+  { key: "market",      label: "Целевой рынок",                placeholder: "Кто покупатель, объём рынка", multiline: true },
+  { key: "competitors", label: "Конкуренты и ваше отличие",    placeholder: "Аналоги и чем вы лучше (числа, параметры)" },
+  { key: "backlog_raw", label: "Что уже сделано / задел",      placeholder: "Прототип, патенты, публикации, испытания" },
+  { key: "team",        label: "Команда",                      placeholder: "ФИО, роли, компетенции" },
+  { key: "budget",      label: "Запрашиваемый бюджет",         placeholder: "например: 1 млн рублей на 12 месяцев" },
+  { key: "revenue_raw", label: "Бизнес-модель / монетизация",  placeholder: "Как проект будет зарабатывать" },
+  { key: "tech_raw",    label: "Технологический стек",         placeholder: "Какие технологии используете" },
 ];
 
 function Inp({ label, value, onChange, placeholder, multiline, rows = 3 }) {
@@ -101,12 +103,13 @@ function SectionCard({ section, result, loading, onGenerate, onRegen, onDelete, 
     }}>
       <div onClick={() => done && setOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", cursor: done ? "pointer" : "default" }}>
         <div style={{
-          width: "22px", height: "22px", borderRadius: "50%", flexShrink: 0,
+          width: "28px", height: "22px", borderRadius: "6px", flexShrink: 0,
           background: done ? C.accent : isCustom ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.06)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "11px", color: done ? "#fff" : isCustom ? C.warn : C.muted,
+          fontSize: "10px", fontWeight: "700", fontFamily: "'IBM Plex Mono', monospace",
+          color: done ? "#fff" : isCustom ? C.warn : C.muted,
         }}>
-          {done ? "✓" : loading ? "…" : isCustom ? "★" : "·"}
+          {done ? "✓" : loading ? "…" : isCustom ? "★" : section.num || "·"}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: "13px", fontWeight: "600", color: done ? C.text : C.muted }}>{section.label}</div>
@@ -130,7 +133,7 @@ function SectionCard({ section, result, loading, onGenerate, onRegen, onDelete, 
 }
 
 export default function App() {
-  const [step, setStep] = useState(0); // 0=выбор гранта, 1=данные, 2=генерация
+  const [step, setStep] = useState(0);
   const [selectedGrant, setSelectedGrant] = useState(null);
   const [selectedDir, setSelectedDir] = useState(null);
   const [userData, setUserData] = useState({});
@@ -143,7 +146,7 @@ export default function App() {
   const [newHint, setNewHint] = useState("");
 
   const setField = key => val => setUserData(u => ({ ...u, [key]: val }));
-  const canStep2 = userData.name && userData.org && userData.title && userData.product && userData.problem;
+  const canStep2 = userData.name && userData.org && userData.title && userData.product && userData.problem_raw;
   const doneCount = sections.filter(s => results[s.id]).length;
 
   const addCustomField = () => {
@@ -174,28 +177,28 @@ export default function App() {
 Программа: ${grant?.label || "Студенческий стартап"}
 Направление: ${dir ? dir.label + " — " + dir.full : "не указано"}
 
-Данные заявителя:
+Данные заявителя (краткие заметки, используй для написания полного текста):
 - Имя: ${userData.name}
 - Университет: ${userData.org || "не указано"}
 - Название проекта: ${userData.title}
-- Описание разработки: ${userData.product}
-- Проблема: ${userData.problem}
+- Суть разработки: ${userData.product}
+- Проблема (кратко от заявителя): ${userData.problem_raw}
 - Рынок: ${userData.market || "не указано"}
 - Конкуренты: ${userData.competitors || "не указано"}
-- Задел: ${userData.backlog || "не указано"}
+- Задел: ${userData.backlog_raw || "не указано"}
 - Команда: ${userData.team || "не указано"}
 - Бюджет: ${userData.budget || "не указано"}
-- Монетизация: ${userData.revenue || "не указано"}
-- Технологии: ${userData.tech || "не указано"}
+- Монетизация: ${userData.revenue_raw || "не указано"}
+- Технологии: ${userData.tech_raw || "не указано"}
 
-Напиши раздел заявки: «${section.label}»
+Напиши раздел заявки №${section.num || ""}: «${section.label}»
 Подсказка: ${section.hint || ""}
 
 Требования:
 - Профессиональный деловой русский язык
 - Конкретные факты, числа, без воды
 - Объём 100-250 слов
-- Только текст раздела без заголовка`
+- Только текст раздела без заголовка и нумерации`
           }]
         }),
       });
@@ -215,7 +218,9 @@ export default function App() {
   const exportText = () => {
     const grant = FSI_GRANTS.find(g => g.id === selectedGrant);
     const dir = DIRECTIONS.find(d => d.id === selectedDir);
-    const lines = sections.map(s => `═══ ${s.label.toUpperCase()} ═══\n\n${results[s.id] || "(не сгенерировано)"}\n`).join("\n");
+    const lines = sections.map(s =>
+      `═══ ${s.num ? s.num + ". " : ""}${s.label.toUpperCase()} ═══\n\n${results[s.id] || "(не сгенерировано)"}\n`
+    ).join("\n");
     const header = `ГРАНТОВАЯ ЗАЯВКА — ФСИ ${grant?.label?.toUpperCase() || ""}\nНаправление: ${dir ? dir.label + " — " + dir.full : ""}\nПроект: ${userData.title}\nЗаявитель: ${userData.name} | ${userData.org || ""}\n\n${"─".repeat(60)}\n\n`;
     const blob = new Blob([header + lines], { type: "text/plain;charset=utf-8" });
     const a = document.createElement("a");
@@ -223,8 +228,6 @@ export default function App() {
     a.download = `fsi_${selectedGrant}.txt`;
     a.click();
   };
-
-  const stepLabels = ["Выбор гранта", "Твои данные", "Генерация"];
 
   return (
     <div style={{ minHeight: "100vh", background: C.bg, fontFamily: "'Inter', sans-serif", color: C.text }}>
@@ -253,7 +256,7 @@ export default function App() {
 
         {/* Steps */}
         <div style={{ display: "flex", gap: "6px", marginBottom: "28px" }}>
-          {stepLabels.map((s, i) => (
+          {["Выбор гранта", "Твои данные", "Генерация"].map((s, i) => (
             <div key={i} style={{
               flex: 1, padding: "8px", borderRadius: "8px", textAlign: "center",
               fontSize: "11px", fontWeight: "600",
@@ -268,30 +271,22 @@ export default function App() {
         {step === 0 && (
           <div>
             <p style={{ margin: "0 0 16px", fontSize: "13px", color: C.muted }}>Выбери программу ФСИ под которую пишешь заявку:</p>
-
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "24px" }}>
               {FSI_GRANTS.map(g => (
                 <div key={g.id} onClick={() => g.ready && setSelectedGrant(g.id)} style={{
                   padding: "16px", borderRadius: "12px", cursor: g.ready ? "pointer" : "default",
                   border: `1px solid ${selectedGrant === g.id ? C.accent : g.ready ? C.border : "rgba(255,255,255,0.04)"}`,
                   background: selectedGrant === g.id ? C.accentDim : g.ready ? C.surface : "rgba(255,255,255,0.02)",
-                  opacity: g.ready ? 1 : 0.45,
-                  transition: "all 0.15s",
-                  position: "relative",
+                  opacity: g.ready ? 1 : 0.45, transition: "all 0.15s", position: "relative",
                 }}>
-                  {!g.ready && (
-                    <span style={{ position: "absolute", top: "8px", right: "10px", fontSize: "9px", color: C.muted, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.05em" }}>СКОРО</span>
-                  )}
-                  {selectedGrant === g.id && (
-                    <span style={{ position: "absolute", top: "8px", right: "10px", fontSize: "11px", color: C.accent }}>✓</span>
-                  )}
+                  {!g.ready && <span style={{ position: "absolute", top: "8px", right: "10px", fontSize: "9px", color: C.muted, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.05em" }}>СКОРО</span>}
+                  {selectedGrant === g.id && <span style={{ position: "absolute", top: "8px", right: "10px", fontSize: "11px", color: C.accent }}>✓</span>}
                   <div style={{ fontSize: "14px", fontWeight: "700", color: g.ready ? C.text : C.muted, marginBottom: "4px" }}>{g.label}</div>
                   <div style={{ fontSize: "11px", color: C.muted }}>{g.desc}</div>
                 </div>
               ))}
             </div>
 
-            {/* Направление — только для студенческого стартапа */}
             {selectedGrant === "student_startup" && (
               <div style={{ marginBottom: "24px" }}>
                 <p style={{ margin: "0 0 12px", fontSize: "13px", color: C.muted }}>Выбери направление конкурса:</p>
@@ -312,7 +307,7 @@ export default function App() {
                         color: selectedDir === d.id ? "#fff" : C.muted,
                       }}>{d.label}</div>
                       <div style={{ fontSize: "13px", color: selectedDir === d.id ? C.text : C.muted, fontWeight: selectedDir === d.id ? "600" : "400" }}>{d.full}</div>
-                      {selectedDir === d.id && <div style={{ marginLeft: "auto", color: C.accent, fontSize: "14px" }}>✓</div>}
+                      {selectedDir === d.id && <div style={{ marginLeft: "auto", color: C.accent }}>✓</div>}
                     </div>
                   ))}
                 </div>
@@ -338,20 +333,17 @@ export default function App() {
         {/* ── STEP 1: Данные ── */}
         {step === 1 && (
           <div>
-            {/* Badge */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: C.surface, border: `1px solid ${C.border}`, borderRadius: "10px", padding: "12px 16px", marginBottom: "20px" }}>
-              <div>
-                <div style={{ fontSize: "12px", color: C.success, fontWeight: "600" }}>
-                  ✓ {FSI_GRANTS.find(g => g.id === selectedGrant)?.label}
-                  {selectedDir && ` · ${DIRECTIONS.find(d => d.id === selectedDir)?.label} ${DIRECTIONS.find(d => d.id === selectedDir)?.full}`}
-                </div>
+              <div style={{ fontSize: "12px", color: C.success, fontWeight: "600" }}>
+                ✓ {FSI_GRANTS.find(g => g.id === selectedGrant)?.label}
+                {selectedDir && ` · ${DIRECTIONS.find(d => d.id === selectedDir)?.label} ${DIRECTIONS.find(d => d.id === selectedDir)?.full}`}
               </div>
               <button onClick={() => setStep(0)} style={{ padding: "5px 12px", fontSize: "11px", borderRadius: "6px", border: `1px solid ${C.border}`, background: "transparent", color: C.muted, cursor: "pointer" }}>← Изменить</button>
             </div>
 
             <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: "14px", padding: "24px", marginBottom: "16px" }}>
               <p style={{ margin: "0 0 20px", fontSize: "13px", color: C.muted, lineHeight: "1.7" }}>
-                Заполни данные о проекте — агент использует их чтобы написать все разделы заявки.
+                Заполни данные кратко — AI сам развернёт их в полные разделы заявки.
               </p>
               {USER_FIELDS.map(f => (
                 <Inp key={f.key} label={f.label} value={userData[f.key] || ""} onChange={setField(f.key)} placeholder={f.placeholder} multiline={f.multiline} />
@@ -380,11 +372,12 @@ export default function App() {
               <button onClick={() => setStep(1)} style={{ padding: "5px 12px", fontSize: "11px", borderRadius: "6px", border: `1px solid ${C.border}`, background: "transparent", color: C.muted, cursor: "pointer" }}>← Изменить</button>
             </div>
 
+            {/* Progress */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
               <div style={{ flex: 1, height: "3px", borderRadius: "2px", background: C.border, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${(doneCount / sections.length) * 100}%`, background: C.accent, transition: "width 0.4s" }} />
               </div>
-              <span style={{ fontSize: "12px", color: C.muted, fontFamily: "'IBM Plex Mono', monospace", whiteSpace: "nowrap" }}>{doneCount}/{sections.length}</span>
+              <span style={{ fontSize: "12px", color: C.muted, fontFamily: "'IBM Plex Mono', monospace", whiteSpace: "nowrap" }}>{doneCount}/{sections.length} полей</span>
             </div>
 
             <div style={{ display: "flex", gap: "8px", marginBottom: "20px" }}>
@@ -432,7 +425,7 @@ export default function App() {
             {doneCount === sections.length && doneCount > 0 && (
               <div style={{ marginTop: "20px", padding: "20px", borderRadius: "12px", background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.25)", textAlign: "center" }}>
                 <div style={{ fontSize: "18px", marginBottom: "6px" }}>✓</div>
-                <div style={{ fontSize: "14px", fontWeight: "600", color: C.success }}>Все разделы готовы!</div>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: C.success }}>Все {sections.length} полей готовы!</div>
                 <button onClick={exportText} style={{ marginTop: "12px", padding: "10px 28px", borderRadius: "8px", border: "none", background: C.success, color: "#fff", fontWeight: "600", fontSize: "13px", cursor: "pointer" }}>↓ Скачать заявку .txt</button>
               </div>
             )}
