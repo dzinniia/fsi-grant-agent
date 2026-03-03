@@ -66,13 +66,12 @@ function Inp({ label, value, onChange, placeholder, multiline, rows = 3 }) {
 }
 
 function SectionCard({ section, result, loading, onRegen, onDelete, isCustom }) {
-  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const done = !!result && !loading;
   const copy = () => { navigator.clipboard.writeText(result); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   return (
     <div style={{ border: `1px solid ${done ? "rgba(59,130,246,0.35)" : loading ? "rgba(59,130,246,0.2)" : isCustom ? "rgba(245,158,11,0.3)" : "rgba(255,255,255,0.07)"}`, borderRadius: "12px", marginBottom: "10px", overflow: "hidden", background: done ? "rgba(59,130,246,0.04)" : loading ? "rgba(59,130,246,0.02)" : "#13161e", transition: "all 0.3s" }}>
-      <div onClick={() => done && setOpen(o => !o)} style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", cursor: done ? "pointer" : "default" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", cursor: "default" }}>
         <div style={{ width: "28px", height: "22px", borderRadius: "6px", flexShrink: 0, background: done ? "#3b82f6" : loading ? "rgba(59,130,246,0.3)" : isCustom ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "10px", fontWeight: "700", fontFamily: "monospace", color: done ? "#fff" : loading ? "#3b82f6" : isCustom ? "#f59e0b" : "rgba(226,232,240,0.4)" }}>
           {done ? "✓" : loading ? "…" : isCustom ? "★" : section.num || "·"}
         </div>
@@ -82,13 +81,12 @@ function SectionCard({ section, result, loading, onRegen, onDelete, isCustom }) 
           {!loading && !done && section.hint && <div style={{ fontSize: "11px", color: "rgba(226,232,240,0.4)", marginTop: "2px", fontStyle: "italic", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{section.hint}</div>}
         </div>
         <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-          {done && <button onClick={e => { e.stopPropagation(); copy(); }} style={{ padding: "4px 10px", fontSize: "11px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.07)", background: "transparent", color: copied ? "#10b981" : "rgba(226,232,240,0.4)", cursor: "pointer" }}>{copied ? "✓" : "copy"}</button>}
-          {done && <button onClick={e => { e.stopPropagation(); onRegen(); }} style={{ padding: "4px 10px", fontSize: "11px", borderRadius: "6px", border: "1px solid rgba(59,130,246,0.3)", background: "transparent", color: "#3b82f6", cursor: "pointer" }}>↺</button>}
-          {isCustom && <button onClick={e => { e.stopPropagation(); onDelete(); }} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "6px", border: "1px solid rgba(239,68,68,0.3)", background: "transparent", color: "#ef4444", cursor: "pointer" }}>✕</button>}
-          {done && <span style={{ fontSize: "11px", color: "rgba(226,232,240,0.4)", padding: "4px 2px" }}>{open ? "▲" : "▼"}</span>}
+          {done && <button onClick={() => copy()} style={{ padding: "4px 10px", fontSize: "11px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.07)", background: "transparent", color: copied ? "#10b981" : "rgba(226,232,240,0.4)", cursor: "pointer" }}>{copied ? "✓" : "copy"}</button>}
+          {done && <button onClick={() => onRegen()} style={{ padding: "4px 10px", fontSize: "11px", borderRadius: "6px", border: "1px solid rgba(59,130,246,0.3)", background: "transparent", color: "#3b82f6", cursor: "pointer" }}>↺</button>}
+          {isCustom && <button onClick={() => onDelete()} style={{ padding: "4px 8px", fontSize: "11px", borderRadius: "6px", border: "1px solid rgba(239,68,68,0.3)", background: "transparent", color: "#ef4444", cursor: "pointer" }}>✕</button>}
         </div>
       </div>
-      {done && open && (
+      {done && (
         <div style={{ padding: "0 18px 18px", borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "14px" }}>
           <p style={{ margin: 0, fontSize: "13px", lineHeight: "1.9", color: "rgba(226,232,240,0.85)", whiteSpace: "pre-wrap", fontFamily: "'Lora', serif" }}>{result}</p>
         </div>
@@ -115,12 +113,14 @@ export default function App() {
   const canProceed = USER_FIELDS.every(f => userData[f.key]?.trim());
   const doneCount = sections.filter(s => results[s.id]).length;
 
-  const deleteField = (id) => {
-    setSections(s => s.filter(sec => sec.id !== id));
-    setResults(r => { const n = { ...r }; delete n[id]; return n; });
+  const exportText = () => {
+    const grant = FSI_GRANTS.find(g => g.id === selectedGrant);
+    const dir = DIRECTIONS.find(d => d.id === selectedDir);
+    const lines = sections.map(s => `═══ ${s.num ? s.num + ". " : ""}${s.label.toUpperCase()} ═══\n\n${results[s.id] || "(не сгенерировано)"}\n`).join("\n");
+    const header = `ГРАНТОВАЯ ЗАЯВКА — ФСИ ${grant?.label?.toUpperCase() || ""}\nНаправление: ${dir ? dir.label + " — " + dir.full : ""}\nПроект: ${userData.title}\nЗаявитель: ${userData.name} | ${userData.org}\n\n${"─".repeat(60)}\n\n`;
+    const blob = new Blob([header + lines], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `fsi_${selectedGrant}.txt`; a.click();
   };
-
-  const generateOne = useCallback(async (sectionId, secs, uData, grantId, dirId) => {
     const sec = (secs || FSI_SECTIONS).find(s => s.id === sectionId);
     if (!sec) return;
     const grant = FSI_GRANTS.find(g => g.id === (grantId || selectedGrant));
@@ -280,7 +280,6 @@ export default function App() {
                 <span style={{ fontSize: "12px", color: allDone ? "#10b981" : "#3b82f6", fontWeight: "600" }}>
                   {allDone ? "✓ Все разделы готовы!" : `Генерирую разделы... ${doneCount}/${sections.length}`}
                 </span>
-                {allDone && <button onClick={exportText} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", background: "#10b981", color: "#fff", fontWeight: "600", fontSize: "12px", cursor: "pointer" }}>↓ Скачать .txt</button>}
               </div>
               <div style={{ height: "4px", borderRadius: "2px", background: "rgba(255,255,255,0.07)", overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${(doneCount / sections.length) * 100}%`, background: allDone ? "#10b981" : "#3b82f6", transition: "width 0.5s" }} />
@@ -307,8 +306,7 @@ export default function App() {
             {allDone && (
               <div style={{ marginTop: "20px", padding: "20px", borderRadius: "12px", background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.25)", textAlign: "center" }}>
                 <div style={{ fontSize: "14px", fontWeight: "600", color: "#10b981", marginBottom: "4px" }}>✓ Заявка готова!</div>
-                <div style={{ fontSize: "12px", color: "rgba(226,232,240,0.4)", marginBottom: "14px" }}>Нажми на раздел чтобы открыть · ↺ чтобы перегенерировать</div>
-                <button onClick={exportText} style={{ padding: "11px 32px", borderRadius: "8px", border: "none", background: "#10b981", color: "#fff", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>↓ Скачать заявку .txt</button>
+                <div style={{ fontSize: "12px", color: "rgba(226,232,240,0.4)" }}>↺ нажми чтобы перегенерировать раздел</div>
               </div>
             )}
           </div>
