@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const C = {
   bg: "#0d0f14", surface: "#13161e", border: "rgba(255,255,255,0.07)",
@@ -115,7 +115,7 @@ export default function App() {
   const [newLabel, setNewLabel] = useState("");
   const [newHint, setNewHint] = useState("");
   const [allDone, setAllDone] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const generatingRef = useRef(false);
 
   const setField = key => val => setUserData(u => ({ ...u, [key]: val }));
   const canProceed = USER_FIELDS.every(f => userData[f.key]?.trim());
@@ -126,10 +126,12 @@ export default function App() {
     setResults(r => { const n = { ...r }; delete n[id]; return n; });
   };
 
-  const generateOne = async (sectionId, secs) => {
-    const sec = (secs || sections).find(s => s.id === sectionId);
-    const grant = FSI_GRANTS.find(g => g.id === selectedGrant);
-    const dir = DIRECTIONS.find(d => d.id === selectedDir);
+  const generateOne = useCallback(async (sectionId, secs, uData, grantId, dirId) => {
+    const sec = (secs || FSI_SECTIONS).find(s => s.id === sectionId);
+    if (!sec) return;
+    const grant = FSI_GRANTS.find(g => g.id === (grantId || selectedGrant));
+    const dir = DIRECTIONS.find(d => d.id === (dirId || selectedDir));
+    const ud = uData || userData;
     setLoading(l => ({ ...l, [sectionId]: true }));
     try {
       const res = await fetch("/api/chat", {
@@ -143,13 +145,13 @@ export default function App() {
 Направление: ${dir ? dir.label + " — " + dir.full : "не указано"}
 
 Данные заявителя:
-- Имя: ${userData.name}
-- Университет: ${userData.org}
-- Название проекта: ${userData.title}
-- Суть разработки: ${userData.product}
-- Проблема (кратко): ${userData.problem_raw}
-- Команда: ${userData.team}
-- Задел: ${userData.backlog_raw}
+- Имя: ${ud.name}
+- Университет: ${ud.org}
+- Название проекта: ${ud.title}
+- Суть разработки: ${ud.product}
+- Проблема (кратко): ${ud.problem_raw}
+- Команда: ${ud.team}
+- Задел: ${ud.backlog_raw}
 
 Напиши раздел заявки №${sec.num || ""}: «${sec.label}»
 Подсказка: ${sec.hint || ""}
@@ -167,19 +169,21 @@ export default function App() {
       setResults(r => ({ ...r, [sectionId]: text }));
     } catch (e) { console.error(e); }
     finally { setLoading(l => ({ ...l, [sectionId]: false })); }
-  };
+  }, [selectedGrant, selectedDir, userData]);
 
   useEffect(() => {
-    if (step !== 2 || generating) return;
+    if (step !== 2 || generatingRef.current) return;
+    generatingRef.current = true;
+    setAllDone(false);
     const run = async () => {
-      setGenerating(true);
-      setAllDone(false);
-      for (const s of sections) { await generateOne(s.id, sections); }
+      for (const s of FSI_SECTIONS) {
+        await generateOne(s.id, FSI_SECTIONS, userData, selectedGrant, selectedDir);
+      }
       setAllDone(true);
-      setGenerating(false);
+      generatingRef.current = false;
     };
     run();
-  }, [step]);
+  }, [step, generateOne, userData, selectedGrant, selectedDir]);
 
   const addAndGenerate = async () => {
     if (!newLabel.trim()) return;
@@ -187,7 +191,7 @@ export default function App() {
     const newSec = { id, label: newLabel.trim(), hint: newHint.trim(), isCustom: true };
     setSections(s => [...s, newSec]);
     setNewLabel(""); setNewHint(""); setShowAddField(false);
-    await generateOne(id, [...sections, newSec]);
+    await generateOne(id, [...sections, newSec], userData, selectedGrant, selectedDir);
   };
 
   const exportText = () => {
@@ -263,7 +267,7 @@ export default function App() {
               {USER_FIELDS.map(f => (<Inp key={f.key} label={f.label} value={userData[f.key] || ""} onChange={setField(f.key)} placeholder={f.placeholder} multiline={f.multiline} />))}
             </div>
             {!canProceed && <p style={{ fontSize: "12px", color: "rgba(226,232,240,0.4)", margin: "0 0 12px" }}>* Заполни все поля</p>}
-            <button onClick={() => { if (canProceed) { setAllDone(false); setResults({}); setGenerating(false); setStep(2); } }} disabled={!canProceed} style={{ width: "100%", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: "700", background: canProceed ? "#3b82f6" : "rgba(255,255,255,0.05)", color: canProceed ? "#fff" : "rgba(226,232,240,0.4)", cursor: canProceed ? "pointer" : "not-allowed", boxShadow: canProceed ? "0 0 20px rgba(59,130,246,0.3)" : "none" }}>⚡ Сгенерировать заявку</button>
+            <button onClick={() => { if (canProceed) { setAllDone(false); setResults({}); generatingRef.current = false; setStep(2); } }} disabled={!canProceed} style={{ width: "100%", padding: "14px", borderRadius: "10px", border: "none", fontSize: "15px", fontWeight: "700", background: canProceed ? "#3b82f6" : "rgba(255,255,255,0.05)", color: canProceed ? "#fff" : "rgba(226,232,240,0.4)", cursor: canProceed ? "pointer" : "not-allowed", boxShadow: canProceed ? "0 0 20px rgba(59,130,246,0.3)" : "none" }}>⚡ Сгенерировать заявку</button>
           </div>
         )}
 
@@ -289,7 +293,7 @@ export default function App() {
               </div>
             </div>
 
-            {sections.map(s => (<SectionCard key={s.id} section={s} result={results[s.id]} loading={!!loading[s.id]} onRegen={() => generateOne(s.id)} onDelete={() => deleteField(s.id)} isCustom={s.isCustom} />))}
+            {sections.map(s => (<SectionCard key={s.id} section={s} result={results[s.id]} loading={!!loading[s.id]} onRegen={() => generateOne(s.id, sections, userData, selectedGrant, selectedDir)} onDelete={() => deleteField(s.id)} isCustom={s.isCustom} />))}
 
             {allDone && !showAddField && (
               <button onClick={() => setShowAddField(true)} style={{ width: "100%", padding: "11px", borderRadius: "10px", marginTop: "8px", border: "1px dashed rgba(245,158,11,0.4)", background: "transparent", color: "#f59e0b", fontSize: "13px", cursor: "pointer" }}>+ Добавить своё поле</button>
