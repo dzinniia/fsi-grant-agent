@@ -195,15 +195,6 @@ export default function App() {
     await generateOne(id, [...sections, newSec], userData, selectedGrant, selectedDir);
   };
 
-  const exportText = () => {
-    const grant = FSI_GRANTS.find(g => g.id === selectedGrant);
-    const dir = DIRECTIONS.find(d => d.id === selectedDir);
-    const lines = sections.map(s => `═══ ${s.num ? s.num + ". " : ""}${s.label.toUpperCase()} ═══\n\n${results[s.id] || "(не сгенерировано)"}\n`).join("\n");
-    const header = `ГРАНТОВАЯ ЗАЯВКА — ФСИ ${grant?.label?.toUpperCase() || ""}\nНаправление: ${dir ? dir.label + " — " + dir.full : ""}\nПроект: ${userData.title}\nЗаявитель: ${userData.name} | ${userData.org}\n\n${"─".repeat(60)}\n\n`;
-    const blob = new Blob([header + lines], { type: "text/plain;charset=utf-8" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `fsi_${selectedGrant}.txt`; a.click();
-  };
-
   return (
     <div style={{ minHeight: "100vh", background: "#0d0f14", fontFamily: "'Inter', sans-serif", color: "#e2e8f0" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Lora&family=Inter:wght@400;500;600;700&display=swap'); * { box-sizing: border-box; } ::placeholder { color: rgba(226,232,240,0.2) !important; } textarea,input { caret-color: #3b82f6; } textarea:focus,input:focus { border-color: rgba(59,130,246,0.5) !important; outline: none; } ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }`}</style>
