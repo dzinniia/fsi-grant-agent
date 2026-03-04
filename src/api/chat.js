@@ -2,9 +2,10 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const text_in = body.messages[0].content;
+    const apiKey = process.env.GEMINI_API_KEY || "AIzaSyBRF_YLBRHKUYhzc-oLCsxLf1dW-5bJdJg"; // Замени на свой ключ
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
