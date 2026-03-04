@@ -2,7 +2,11 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
     const text_in = body.messages[0].content;
-    const apiKey = process.env.GEMINI_API_KEY || "YOUR_API_KEY";
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(400).json({ error: "GEMINI_API_KEY not configured" });
+    }
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
