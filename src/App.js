@@ -67,7 +67,7 @@ function Inp({ label, value, onChange, placeholder, multiline, rows = 3 }) {
   );
 }
 
-function SectionCard({ section, result, loading, onRegen, onDelete, isCustom }) {
+function SectionCard({ section, result, loading, error, onRegen, onDelete, onEdit, isCustom }) {
   const [copied, setCopied] = useState(false);
   const done = !!result && !loading;
 
@@ -80,29 +80,32 @@ function SectionCard({ section, result, loading, onRegen, onDelete, isCustom }) 
   return (
     <div style={{
       borderRadius: "12px", marginBottom: "16px", overflow: "hidden",
-      border: done ? "1px solid rgba(59,130,246,0.35)" : loading ? "1px solid rgba(59,130,246,0.15)" : isCustom ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(255,255,255,0.07)",
+      border: error ? "1px solid rgba(239,68,68,0.4)" : done ? "1px solid rgba(59,130,246,0.35)" : loading ? "1px solid rgba(59,130,246,0.15)" : isCustom ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(255,255,255,0.07)",
       background: "#13161e",
     }}>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", background: done ? "rgba(59,130,246,0.06)" : "transparent", borderBottom: (done || loading) ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "14px 18px", background: done ? "rgba(59,130,246,0.06)" : error ? "rgba(239,68,68,0.04)" : "transparent", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
         <div style={{
           minWidth: "28px", height: "22px", borderRadius: "6px", padding: "0 4px",
-          background: done ? "#3b82f6" : loading ? "rgba(59,130,246,0.25)" : isCustom ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.06)",
+          background: error ? "rgba(239,68,68,0.2)" : done ? "#3b82f6" : loading ? "rgba(59,130,246,0.25)" : isCustom ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.06)",
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: "10px", fontWeight: "700", fontFamily: "monospace",
-          color: done ? "#fff" : loading ? "#3b82f6" : isCustom ? "#f59e0b" : "rgba(226,232,240,0.4)",
+          color: error ? "#ef4444" : done ? "#fff" : loading ? "#3b82f6" : isCustom ? "#f59e0b" : "rgba(226,232,240,0.4)",
         }}>
-          {done ? "✓" : loading ? "…" : isCustom ? "★" : section.num}
+          {error ? "!" : done ? "✓" : loading ? "…" : isCustom ? "★" : section.num}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "13px", fontWeight: "600", color: done ? "#e2e8f0" : "rgba(226,232,240,0.55)" }}>
+          <div style={{ fontSize: "13px", fontWeight: "600", color: error ? "#ef4444" : done ? "#e2e8f0" : "rgba(226,232,240,0.55)" }}>
             {section.label}
           </div>
-          {!done && !loading && (
+          {!done && !loading && !error && (
             <div style={{ fontSize: "11px", color: "rgba(226,232,240,0.3)", marginTop: "2px", fontStyle: "italic" }}>{section.hint}</div>
           )}
           {loading && (
             <div style={{ fontSize: "11px", color: "#3b82f6", marginTop: "2px" }}>генерирую текст...</div>
+          )}
+          {error && (
+            <div style={{ fontSize: "11px", color: "#ef4444", marginTop: "2px" }}>{error}</div>
           )}
         </div>
         <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
@@ -111,7 +114,7 @@ function SectionCard({ section, result, loading, onRegen, onDelete, isCustom }) 
               {copied ? "✓ скопировано" : "копировать"}
             </button>
           )}
-          {done && (
+          {(done || error) && (
             <button onClick={onRegen} title="Перегенерировать" style={{ padding: "5px 10px", fontSize: "13px", borderRadius: "6px", border: "1px solid rgba(59,130,246,0.3)", background: "transparent", color: "#3b82f6", cursor: "pointer" }}>↺</button>
           )}
           {isCustom && (
@@ -120,13 +123,20 @@ function SectionCard({ section, result, loading, onRegen, onDelete, isCustom }) 
         </div>
       </div>
 
-      {/* Результат — всегда открыт */}
-      {done && (
-        <div style={{ padding: "20px 22px" }}>
-          <p style={{ margin: 0, fontSize: "14px", lineHeight: "1.9", color: "rgba(226,232,240,0.88)", whiteSpace: "pre-wrap" }}>
-            {result}
-          </p>
-        </div>
+      {/* Редактируемая ячейка с результатом */}
+      {(done || error) && (
+        <textarea
+          value={result || ""}
+          onChange={e => onEdit(e.target.value)}
+          rows={8}
+          style={{
+            display: "block", width: "100%", padding: "18px 22px",
+            background: "transparent", border: "none", outline: "none",
+            fontSize: "14px", lineHeight: "1.9", color: "rgba(226,232,240,0.88)",
+            fontFamily: "Inter, sans-serif", resize: "vertical",
+            boxSizing: "border-box",
+          }}
+        />
       )}
 
       {/* Скелетон при загрузке */}
@@ -135,6 +145,15 @@ function SectionCard({ section, result, loading, onRegen, onDelete, isCustom }) 
           {[95, 80, 88, 65, 75].map((w, i) => (
             <div key={i} style={{ height: "11px", borderRadius: "6px", background: "rgba(59,130,246,0.08)", marginBottom: "9px", width: `${w}%`, animation: "pulse 1.5s ease-in-out infinite", animationDelay: `${i * 0.1}s` }} />
           ))}
+        </div>
+      )}
+
+      {/* Пустое состояние — ещё не генерировалось */}
+      {!done && !loading && !error && (
+        <div style={{ padding: "18px 22px" }}>
+          <div style={{ height: "80px", borderRadius: "8px", background: "rgba(255,255,255,0.02)", border: "1px dashed rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: "12px", color: "rgba(226,232,240,0.2)" }}>ожидание генерации...</span>
+          </div>
         </div>
       )}
     </div>
@@ -149,6 +168,7 @@ export default function App() {
   const [sections, setSections] = useState(FSI_SECTIONS);
   const [results, setResults] = useState({});
   const [loading, setLoading] = useState({});
+  const [errors, setErrors] = useState({});
   const [showAddField, setShowAddField] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [newHint, setNewHint] = useState("");
@@ -178,6 +198,7 @@ export default function App() {
     const dir = DIRECTIONS.find(d => d.id === dirRef.current);
 
     setLoading(l => ({ ...l, [sectionId]: true }));
+    setErrors(e => { const n = { ...e }; delete n[sectionId]; return n; });
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -211,9 +232,11 @@ export default function App() {
       });
       const data = await res.json();
       const text = data.content?.map(b => b.text || "").join("") || "";
+      if (!text) throw new Error(data.error || "Пустой ответ от API");
       setResults(r => ({ ...r, [sectionId]: text }));
     } catch (e) {
       console.error("generateOne error:", e);
+      setErrors(err => ({ ...err, [sectionId]: e.message }));
     } finally {
       setLoading(l => ({ ...l, [sectionId]: false }));
     }
@@ -421,9 +444,10 @@ export default function App() {
             {sections.map(s => (
               <SectionCard
                 key={s.id} section={s}
-                result={results[s.id]} loading={!!loading[s.id]}
+                result={results[s.id]} loading={!!loading[s.id]} error={errors[s.id]}
                 onRegen={() => generateOne(s.id, sections)}
                 onDelete={() => deleteField(s.id)}
+                onEdit={text => setResults(r => ({ ...r, [s.id]: text }))}
                 isCustom={s.isCustom}
               />
             ))}
