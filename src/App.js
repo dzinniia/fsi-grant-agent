@@ -39,6 +39,8 @@ const FSI_SECTIONS = [
   { id: "tech",            num: 32, label: "Техническое решение проекта",                     hint: "Технологический стек, архитектура" },
   { id: "tech_advantages", num: 33, label: "Преимущества выбранного технического решения",    hint: "Почему именно эта технология" },
   { id: "backlog",         num: 34, label: "Имеющийся задел (в т.ч. научно-технический)",     hint: "Прототип, патенты, публикации, испытания" },
+  { id: "calendar",        num: 35, label: "Календарный план",                                hint: "Этапы реализации проекта с задачами и сроками (12 месяцев)" },
+  { id: "calendar_costs",  num: 36, label: "Калдарный план — затраты",                        hint: "Разбивка бюджета по этапам и статьям расходов" },
 ];
 
 const USER_FIELDS = [
@@ -51,7 +53,7 @@ const USER_FIELDS = [
   { key: "backlog_raw", label: "Что уже сделано / задел *", placeholder: "Прототип, патенты, публикации, расчёты" },
 ];
 
-function Inp({ label, value, onChange, placeholder, multiline, rows = 3 }) {
+function Inp({ label, value, onChange, placeholder, multiline, rows = 3, onExpand, expanding }) {
   const s = {
     width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)",
     borderRadius: "8px", padding: "10px 14px", color: "#e2e8f0", fontSize: "13px",
@@ -59,7 +61,17 @@ function Inp({ label, value, onChange, placeholder, multiline, rows = 3 }) {
   };
   return (
     <div style={{ marginBottom: "14px" }}>
-      <label style={{ display: "block", fontSize: "11px", fontWeight: "600", color: "rgba(226,232,240,0.5)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "6px" }}>{label}</label>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+        <label style={{ fontSize: "11px", fontWeight: "600", color: "rgba(226,232,240,0.5)", textTransform: "uppercase", letterSpacing: "0.08em" }}>{label}</label>
+        {onExpand && (
+          <button onClick={onExpand} disabled={expanding || !value?.trim()} style={{
+            padding: "3px 10px", fontSize: "11px", borderRadius: "5px", border: "1px solid rgba(139,92,246,0.4)",
+            background: "transparent", color: expanding ? "rgba(139,92,246,0.5)" : "#a78bfa", cursor: expanding || !value?.trim() ? "not-allowed" : "pointer",
+          }}>
+            {expanding ? "✦ расширяю..." : "✦ расширить с AI"}
+          </button>
+        )}
+      </div>
       {multiline
         ? <textarea rows={rows} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={s} />
         : <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} style={s} />}
@@ -173,6 +185,7 @@ export default function App() {
   const [newLabel, setNewLabel] = useState("");
   const [newHint, setNewHint] = useState("");
   const [allDone, setAllDone] = useState(false);
+  const [expanding, setExpanding] = useState({});
 
   const generatingRef = useRef(false);
   const userDataRef = useRef({});
@@ -185,6 +198,29 @@ export default function App() {
       userDataRef.current = updated;
       return updated;
     });
+  };
+
+  const expandField = async (key) => {
+    const val = userDataRef.current[key];
+    if (!val?.trim()) return;
+    setExpanding(e => ({ ...e, [key]: true }));
+    try {
+      const prompt = key === "product"
+        ? `Расширь и улучши это описание разработки для грантовой заявки ФСИ. Сделай его более конкретным, технически обоснованным, профессиональным. 3-5 предложений. Верни только текст без заголовков.\n\nИсходный текст: ${val}`
+        : `Расширь и улучши это описание проблемы для грантовой заявки ФСИ. Добавь конкретику, статистику (если уместно), обоснование актуальности. 3-5 предложений. Верни только текст без заголовков.\n\nИсходный текст: ${val}`;
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
+      });
+      const data = await res.json();
+      const text = data.content?.map(b => b.text || "").join("") || "";
+      if (text) setField(key)(text);
+    } catch (e) {
+      console.error("expandField error:", e);
+    } finally {
+      setExpanding(e => ({ ...e, [key]: false }));
+    }
   };
 
   const canProceed = USER_FIELDS.every(f => userData[f.key]?.trim());
@@ -396,7 +432,12 @@ export default function App() {
               <p style={{ margin: "0 0 4px", fontSize: "13px", color: "rgba(226,232,240,0.5)" }}>Заполни кратко — AI развернёт все 18 разделов заявки.</p>
               <p style={{ margin: "0 0 20px", fontSize: "11px", color: "rgba(226,232,240,0.25)" }}>Рынок, конкурентов и монетизацию AI определит сам.</p>
               {USER_FIELDS.map(f => (
-                <Inp key={f.key} label={f.label} value={userData[f.key] || ""} onChange={setField(f.key)} placeholder={f.placeholder} multiline={f.multiline} />
+                <Inp
+                  key={f.key} label={f.label} value={userData[f.key] || ""}
+                  onChange={setField(f.key)} placeholder={f.placeholder} multiline={f.multiline}
+                  onExpand={(f.key === "product" || f.key === "problem_raw") ? () => expandField(f.key) : undefined}
+                  expanding={expanding[f.key]}
+                />
               ))}
             </div>
 
